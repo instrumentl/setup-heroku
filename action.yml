@@ -1,0 +1,13 @@
+name: 'Set up Heroku'
+description: 'Set up the Heroku CLI'
+runs:
+  using: "composite"
+  steps:
+  - shell: bash
+    name: "Ensure GPG installed"
+    shell: bash
+    run: "if ! command -v gpg; then apt-get install --no-install-recommends gnupg2 ; fi"
+  - shell: bash
+    run: "curl -f https://cli-assets.heroku.com/install-ubuntu.sh | sh"
+  - run: "heroku version"
+  - shell: bash
