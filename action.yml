@@ -43,7 +43,7 @@ runs:
       if [[ "$version" = "latest" ]]; then
         url="https://cli-assets.heroku.com/channels/stable/heroku-linux-${machine}.tar.gz"
       else
-        url="$(jq -cr '.["'"${version}"'"]' < versions.json)"
+        url="$(jq -cr '.["'"${version}"'"]' < "$wd/versions.json")"
       fi
       if [[ -z "$url" ]] || [[ "$url" = "null" ]]; then
         echo >&2 "Could not find download for ${version} for ${machine}"
