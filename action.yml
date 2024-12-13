@@ -14,7 +14,8 @@ runs:
       if ! command -v gpg; then sudo -n apt-get install --no-install-recommends gnupg2 ; fi
       if ! command -v curl; then sudo -n apt-get install --no-install-recommends curl ; fi
       if ! command -v jq; then sudo -n apt-get install --no-install-recommends jq ; fi
-  - name: "Install Heroku CLI"
+  - name: "Determine download url"
+    id: get_url
     shell: bash
     env:
       version: ${{ inputs.version }}
@@ -49,11 +50,24 @@ runs:
         echo >&2 "Could not find download for ${version} for ${machine}"
         exit 1
       fi
-      curl -o "$wd/heroku.tar.gz" -sq "$url"
+  - name: Cache CLI
+    id: cache-cli
+    uses: actions/cache@v4
+    with:
+      path: /tmp/heroku-${{ inputs.version }}.tar.gz
+      key: ${{ runner.os }}-${{ runner.arch }}-${{ steps.get_url.outputs.url }}
+  - name: "Download CLI"
+    if: steps.cache.outputs.cache-hit != 'true'
+    run: |
+      curl -o "/tmp/heroku-${{ inputs.version }}.tar.gz" -sq "${{ steps.get_url.outputs.url }}"
+  - name: "Install Heroku CLI"
+    shell: bash
+    run: |
+      set -euo pipefail
 
       sudo -n rm -rf /usr/local/lib/heroku
       sudo -n mkdir -p /usr/local/lib/heroku
-      sudo -n tar -C /usr/local/lib -xpzf "$wd/heroku.tar.gz"
+      sudo -n tar -C /usr/local/lib -xpzf "/tmp/heroku-${{ inputs.version }}.tar.gz"
       sudo -n rm -f /usr/local/bin/heroku
       sudo -n ln -s /usr/local/lib/heroku/bin/heroku /usr/local/bin/heroku
 
