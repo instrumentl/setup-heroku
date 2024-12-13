@@ -3,14 +3,17 @@ on:
     branches: ['*']
   push:
     branches: ['main']
+  schedule:
+  - cron: "18 18 * * 1"
 
 jobs:
   selfcheck:
-    runs-on: ubuntu-24.04
     name: Test Action
     strategy:
       matrix:
+        runner: [ubuntu-22.04, ubuntu-24.04, ubuntu-latest]
         version: [latest, 9.5.1, 10.0.0]
+    runs-on: ${{ matrix.runner }}
     steps:
       # To use this repository's private action,
       # you must check out the repository
