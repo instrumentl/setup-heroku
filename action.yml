@@ -52,14 +52,14 @@ runs:
       fi
       echo "url=${url}" >> "$GITHUB_OUTPUT"
   - name: Cache CLI
-    id: cache-cli
+    id: cache_cli
     uses: actions/cache@v4
     with:
       path: /tmp/heroku-${{ inputs.version }}.tar.gz
       key: ${{ runner.os }}-${{ runner.arch }}-${{ steps.get_url.outputs.url }}
   - name: "Download CLI"
     shell: bash
-    if: steps.cache.outputs.cache-hit != 'true'
+    if: steps.cache_cli.outputs.cache-hit != 'true'
     run: |
       curl -o "/tmp/heroku-${{ inputs.version }}.tar.gz" -sq "${{ steps.get_url.outputs.url }}"
   - name: "Install Heroku CLI"
