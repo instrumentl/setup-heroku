@@ -1,0 +1,21 @@
+on:
+  pull_request:
+    branches: ['*']
+  push:
+    branches: ['main']
+
+jobs:
+  selfcheck:
+    runs-on: ubuntu-24.04
+    name: Test Action
+    strategy:
+      matrix:
+        version: [latest, 9.5.1, 10.0.0]
+    steps:
+      # To use this repository's private action,
+      # you must check out the repository
+      - name: Checkout
+        uses: actions/checkout@v4
+      - uses: ./
+        with:
+          version: ${{matrix.version}}

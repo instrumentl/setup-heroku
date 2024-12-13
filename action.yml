@@ -1,14 +1,63 @@
 name: 'Set up Heroku'
 description: 'Set up the Heroku CLI'
+inputs:
+  version:
+    description: "Version to install"
+    required: true
+    default: "latest"
 runs:
   using: "composite"
   steps:
-  - name: "Ensure GPG installed"
+  - name: "Ensure dependencies are installed"
     shell: bash
-    run: "if ! command -v gpg; then apt-get install --no-install-recommends gnupg2 ; fi"
+    run: |
+      if ! command -v gpg; then apt-get install --no-install-recommends gnupg2 ; fi
+      if ! command -v curl; then apt-get install --no-install-recommends curl ; fi
+      if ! command -v jq; then apt-get install --no-install-recommends jq ; fi
   - name: "Install Heroku CLI"
     shell: bash
-    run: "curl -f https://cli-assets.heroku.com/install-ubuntu.sh | sh"
+    env:
+      version: ${{ inputs.version }}
+    run: |
+      set -euo pipefail
+
+      wd="$(mktemp -d)"
+      on_exit() {
+        status=$?
+        [[ -n "$wd" ]] && rm -rf "$wd"
+        exit $status
+      }
+
+      trap on_exit EXIT INT TERM
+      raw_machine="$(uname -m)"
+      if [[ "$raw_machine" = "aarch64" ]]; then
+        machine="arm"
+      elsif [[ "$raw_machine" = "x86_64" ]]; then
+        machine="x64"
+      else
+        echo >&2 "Unhandled machine type $raw_machine"
+        exit 1
+      fi
+
+      curl -fqs -o "$wd/versions.json" "https://cli-assets.heroku.com/versions/heroku-linux-${machine}-tar-gz.json"
+      if [[ "$version" = "latest" ]]; then
+        url="https://cli-assets.heroku.com/channels/stable/heroku-linux-${machine}.tar.gz"
+      else
+        url="$(jq -cr '.["'"${version}"'"]' < versions.json)"
+      fi
+      if [[ -z "$url" ]] || [[ "$url" = "null" ]]; then
+        echo >&2 "Could not find download for ${version} for ${machine}"
+        exit 1
+      fi
+      curl -o "$wd/heroku.tar.gz" "$url"
+
+      mkdir -p /usr/local/lib
+      rm -rf /usr/local/lib/heroku
+      tar -xzf "$wd/heroku.tar.gz" -C /usr/local/lib
+      rm -f /usr/local/bin/heroku
+      ln -s /usr/local/lib/heroku/bin/heroku /usr/local/bin/heroku
+
+      /usr/local/lib/heroku/bin/node -v || rm /usr/local/lib/heroku/bin/node
   - name: "Test that it runs correctly"
     run: "heroku version"
     shell: bash
