@@ -11,9 +11,9 @@ runs:
   - name: "Ensure dependencies are installed"
     shell: bash
     run: |
-      if ! command -v gpg; then apt-get install --no-install-recommends gnupg2 ; fi
-      if ! command -v curl; then apt-get install --no-install-recommends curl ; fi
-      if ! command -v jq; then apt-get install --no-install-recommends jq ; fi
+      if ! command -v gpg; then sudo -n apt-get install --no-install-recommends gnupg2 ; fi
+      if ! command -v curl; then sudo -n apt-get install --no-install-recommends curl ; fi
+      if ! command -v jq; then sudo -n apt-get install --no-install-recommends jq ; fi
   - name: "Install Heroku CLI"
     shell: bash
     env:
@@ -49,15 +49,15 @@ runs:
         echo >&2 "Could not find download for ${version} for ${machine}"
         exit 1
       fi
-      curl -o "$wd/heroku.tar.gz" "$url"
+      curl -o "$wd/heroku.tar.gz" -sq "$url"
 
-      rm -rf /usr/local/lib/heroku
-      mkdir -p /usr/local/lib/heroku
-      tar -C /usr/local/lib -xpzf "$wd/heroku.tar.gz"
-      rm -f /usr/local/bin/heroku
-      ln -s /usr/local/lib/heroku/bin/heroku /usr/local/bin/heroku
+      sudo -n rm -rf /usr/local/lib/heroku
+      sudo -n mkdir -p /usr/local/lib/heroku
+      sudo -n tar -C /usr/local/lib -xpzf "$wd/heroku.tar.gz"
+      sudo -n rm -f /usr/local/bin/heroku
+      sudo -n ln -s /usr/local/lib/heroku/bin/heroku /usr/local/bin/heroku
 
-      /usr/local/lib/heroku/bin/node -v || rm /usr/local/lib/heroku/bin/node
+      /usr/local/lib/heroku/bin/node -v || sudo -n rm /usr/local/lib/heroku/bin/node
   - name: "Test that it runs correctly"
     run: "heroku version"
     shell: bash
