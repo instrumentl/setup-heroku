@@ -32,7 +32,7 @@ runs:
       raw_machine="$(uname -m)"
       if [[ "$raw_machine" = "aarch64" ]]; then
         machine="arm"
-      elsif [[ "$raw_machine" = "x86_64" ]]; then
+      elif [[ "$raw_machine" = "x86_64" ]]; then
         machine="x64"
       else
         echo >&2 "Unhandled machine type $raw_machine"

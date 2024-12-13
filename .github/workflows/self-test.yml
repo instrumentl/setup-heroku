@@ -19,3 +19,10 @@ jobs:
       - uses: ./
         with:
           version: ${{matrix.version}}
+  lint-with-pre-commit:
+    runs-on: ubuntu-24.04
+    name: Lint with pre-commit
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+    - uses: instrumentl/pre-commit-action@v4
