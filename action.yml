@@ -51,9 +51,9 @@ runs:
       fi
       curl -o "$wd/heroku.tar.gz" "$url"
 
-      mkdir -p /usr/local/lib
       rm -rf /usr/local/lib/heroku
-      tar -xzf "$wd/heroku.tar.gz" -C /usr/local/lib
+      mkdir -p /usr/local/lib/heroku
+      tar -C /usr/local/lib -xpzf "$wd/heroku.tar.gz"
       rm -f /usr/local/bin/heroku
       ln -s /usr/local/lib/heroku/bin/heroku /usr/local/bin/heroku
 
