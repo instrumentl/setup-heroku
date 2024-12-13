@@ -50,6 +50,7 @@ runs:
         echo >&2 "Could not find download for ${version} for ${machine}"
         exit 1
       fi
+      echo "url=${url}" >> "$GITHUB_OUTPUT"
   - name: Cache CLI
     id: cache-cli
     uses: actions/cache@v4
@@ -57,6 +58,7 @@ runs:
       path: /tmp/heroku-${{ inputs.version }}.tar.gz
       key: ${{ runner.os }}-${{ runner.arch }}-${{ steps.get_url.outputs.url }}
   - name: "Download CLI"
+    shell: bash
     if: steps.cache.outputs.cache-hit != 'true'
     run: |
       curl -o "/tmp/heroku-${{ inputs.version }}.tar.gz" -sq "${{ steps.get_url.outputs.url }}"
